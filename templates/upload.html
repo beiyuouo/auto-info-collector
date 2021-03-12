@@ -1,13 +1,17 @@
-<html>
-<head>
-  <title>自动化打卡收集</title>
-    {% import 'bootstrap/wtf.html' as wtf %}
-</head>
-<body style="margin: 100 auto; text-align:center; width: 100%">
+{% extends 'base.html' %}
+{% from 'macros.html' import form_field %}
 
-        <form method="POST" action="/" enctype=multipart/form-data>
-            file : <input type="file" name="image"><br />
-            <input type="submit" value="submit"><br />
-        </form>
-</body>
-</html>
+{% block content %}
+<h2>File Upload Form</h2>
+
+<form method="post" enctype="multipart/form-data">
+    {{ form.csrf_token }}
+    {{ form.group }}
+    {{ form.date }}
+    {{ form.name }}
+    {{ form_field(form.screenshot_1) }}
+    {{ form_field(form.screenshot_2) }}
+    {{ form_field(form.screenshot_3) }}
+    {{ form.submit }}
+</form>
+{% endblock %}

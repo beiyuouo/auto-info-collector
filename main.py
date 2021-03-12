@@ -4,53 +4,85 @@
 # Description:
 
 __author__ = "BeiYu"
-
-import logging
 import os
+import uuid
 
-from flask import Flask, send_from_directory, request, render_template
-from flask_bootstrap import Bootstrap
-from werkzeug.utils import secure_filename
+from flask import Flask, render_template, flash, redirect, url_for, request, send_from_directory, session
+from flask_wtf.csrf import validate_csrf
+from wtforms import ValidationError
+
+from forms import UploadForm
 
 from config import config
 
 app = Flask(__name__)
-bootstrap = Bootstrap(app)
-file_handler = logging.FileHandler('server.log')
-app.logger.addHandler(file_handler)
-app.logger.setLevel(logging.INFO)
+app.secret_key = os.getenv('SECRET_KEY', 'secret string')
+app.jinja_env.trim_blocks = True
+app.jinja_env.lstrip_blocks = True
 
-PROJECT_HOME = os.path.dirname(os.path.realpath(__file__))
-UPLOAD_FOLDER = '{}/uploads/'.format(PROJECT_HOME)
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+# Custom config
+app.config['UPLOAD_PATH'] = os.path.join(app.root_path, 'uploads')
 
+if not os.path.exists(app.config['UPLOAD_PATH']):
+    os.makedirs(app.config['UPLOAD_PATH'])
 
-def create_new_folder(local_dir):
-    newpath = local_dir
-    if not os.path.exists(newpath):
-        os.makedirs(newpath)
-    return newpath
+app.config['ALLOWED_EXTENSIONS'] = ['png', 'jpg', 'jpeg', 'gif']
 
+# Flask config
+# set request body's max length
+# app.config['MAX_CONTENT_LENGTH'] = 3 * 1024 * 1024  # 3Mb
 
-@app.route('/uploader', methods=['POST'])
-def api_root():
-    app.logger.info(PROJECT_HOME)
-    if request.method == 'POST' and request.files['image']:
-        app.logger.info(app.config['UPLOAD_FOLDER'])
-        img = request.files['image']
-        img_name = secure_filename(img.filename)
-        create_new_folder(app.config['UPLOAD_FOLDER'])
-        saved_path = os.path.join(app.config['UPLOAD_FOLDER'], img_name)
-        app.logger.info("saving {}".format(saved_path))
-        img.save(saved_path)
-        return send_from_directory(app.config['UPLOAD_FOLDER'], img_name, as_attachment=True)
-    else:
-        return "Where is the image?"
+# Flask-CKEditor config
+app.config['CKEDITOR_SERVE_LOCAL'] = True
+app.config['CKEDITOR_FILE_UPLOADER'] = 'upload_for_ckeditor'
+
+# Flask-Dropzone config
+app.config['DROPZONE_ALLOWED_FILE_TYPE'] = 'image'
+app.config['DROPZONE_MAX_FILE_SIZE'] = 3
+app.config['DROPZONE_MAX_FILES'] = 30
 
 
-@app.route('/', methods=['POST', 'GET'])
-def index_page():
-    return render_template('upload.html')
+@app.route('/uploads/<path:filename>')
+def get_file(filename):
+    return send_from_directory(app.config['UPLOAD_PATH'], filename)
+
+
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
+
+
+def random_filename(filename):
+    ext = os.path.splitext(filename)[1]
+    new_filename = uuid.uuid4().hex + ext
+    return new_filename
+
+
+@app.route('/upload', methods=['GET', 'POST'])
+def upload():
+    form = UploadForm()
+    if form.validate_on_submit():
+        f = form.screenshot_1.data
+        filename = random_filename(f.filename)
+        f.save(os.path.join(app.config['UPLOAD_PATH'], filename))
+
+        f = form.screenshot_2.data
+        filename = random_filename(f.filename)
+        f.save(os.path.join(app.config['UPLOAD_PATH'], filename))
+
+        f = form.screenshot_3.data
+        filename = random_filename(f.filename)
+        f.save(os.path.join(app.config['UPLOAD_PATH'], filename))
+
+        flash('Upload success.')
+        session['filenames'] = [filename]
+        return redirect(url_for('success'))
+    return render_template('upload.html', form=form)
+
+
+@app.route('/success', methods=['GET', 'POST'])
+def success():
+    return "<h2>Success</h2>"
 
 
 def make_today_dirs(today: str, group_id: int):

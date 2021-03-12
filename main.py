@@ -5,85 +5,52 @@
 
 __author__ = "BeiYu"
 
-from flask import Flask, render_template, request, url_for
-from werkzeug.utils import secure_filename, redirect
-from flask_wtf import FlaskForm
-from flask_wtf.file import FileAllowed, FileRequired, FileField
-from wtforms import StringField, SubmitField, DateField, SelectField
-from wtforms.validators import DataRequired, Length, regexp
-from flask_bootstrap import Bootstrap
+import logging
 import os
-from config import *
-from datetime import datetime
+
+from flask import Flask, send_from_directory, request, render_template
+from flask_bootstrap import Bootstrap
+from werkzeug.utils import secure_filename
+
+from config import config
 
 app = Flask(__name__)
-app.config['UPLOAD_FOLDER'] = 'upload/'
-app.config['SECRET_KEY'] = 'key'
 bootstrap = Bootstrap(app)
+file_handler = logging.FileHandler('server.log')
+app.logger.addHandler(file_handler)
+app.logger.setLevel(logging.INFO)
+
+PROJECT_HOME = os.path.dirname(os.path.realpath(__file__))
+UPLOAD_FOLDER = '{}/uploads/'.format(PROJECT_HOME)
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 
-class LoginForm(FlaskForm):
-    group = SelectField(u'组别', choices=config.group_list)
-    date = DateField(u'日期', format="%Y-%m-%d", default=datetime.today(),
-                     validators=[DataRequired(message=u'日期不能为空')])
-    name = SelectField(u'姓名', choices=config.name_list[0])
-    screenshot_1 = FileField(u'截图1')
-    screenshot_2 = FileField(u'截图2')
-    screenshot_3 = FileField(u'截图3')
-    # screenshot_1 = FileField(u'截图1', validators=[
-    #     FileRequired(message='第1张截图不能为空'),
-    #     FileAllowed(['jpg', 'jpeg', 'png'], message='只能上传jpg, jpeg, png')
-    # ])
-    # screenshot_2 = FileField(u'截图2', validators=[
-    #     FileRequired(message='第2张截图不能为空'),
-    #     FileAllowed(['jpg', 'jpeg', 'png'], message='只能上传jpg, jpeg, png')
-    # ])
-    # screenshot_3 = FileField(u'截图3', validators=[
-    #     FileRequired(message='第3张截图不能为空'),
-    #     FileAllowed(['jpg', 'jpeg', 'png'], message='只能上传jpg, jpeg, png')
-    # ])
-    submit = SubmitField(u'提交')
+def create_new_folder(local_dir):
+    newpath = local_dir
+    if not os.path.exists(newpath):
+        os.makedirs(newpath)
+    return newpath
 
 
-@app.route('/upload', methods=['GET', 'POST'])
-def uploader():
-    form = LoginForm()
-    if form.validate_on_submit():
-        # print('miaomiaomiao')
-        group_id = int(form.group.data)
-        today = form.date.data
-        name = form.name.data
-        print(group_id, today, name)
-        make_today_dirs(today, group_id)
-
-        # TODO
-        filename = secure_filename(form.screenshot_1.data.filename)
-        form.screenshot_1.data.save(filename)
-        print(form.screenshot_1.name)
-        print(request.files)
-        image_data = request.files[form.screenshot_1.name].read()
-        print('get data')
-        open(os.path.join(form.screenshot_1.data), 'w').write(image_data)
-        form.screenshot_1.data.save('1.jpg')
-        f = form.screenshot_1.data
-        filename = f'{today}-{name}-{1}'
-        f.save(os.path.join('database', str(group_id), today, name, filename))
-
-        f = form.screenshot_2.data
-        filename = f'{today}-{name}-{2}'
-        f.save(os.path.join('database', str(group_id), today, name, filename))
-
-        f = form.screenshot_3.data
-        filename = f'{today}-{name}-{3}'
-        f.save(os.path.join('database', str(group_id), today, name, filename))
-        return redirect(url_for('success'))
-
-    return render_template('upload.html', form=form)
+@app.route('/uploader', methods=['POST'])
+def api_root():
+    app.logger.info(PROJECT_HOME)
+    if request.method == 'POST' and request.files['image']:
+        app.logger.info(app.config['UPLOAD_FOLDER'])
+        img = request.files['image']
+        img_name = secure_filename(img.filename)
+        create_new_folder(app.config['UPLOAD_FOLDER'])
+        saved_path = os.path.join(app.config['UPLOAD_FOLDER'], img_name)
+        app.logger.info("saving {}".format(saved_path))
+        img.save(saved_path)
+        return send_from_directory(app.config['UPLOAD_FOLDER'], img_name, as_attachment=True)
+    else:
+        return "Where is the image?"
 
 
-@app.route('/success')
-def success():
-    return '<h1>Success</h1>'
+@app.route('/', methods=['POST', 'GET'])
+def index_page():
+    return render_template('upload.html')
 
 
 def make_today_dirs(today: str, group_id: int):

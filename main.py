@@ -62,16 +62,28 @@ def random_filename(filename):
 def upload():
     form = UploadForm()
     if form.validate_on_submit():
+        group_id = str(form.group.data)
+        name = str(form.name.data)
+        date = str(form.date.data)
+        print(group_id, name, date)
+        make_today_dirs(date, int(group_id))
+
         f = form.screenshot_1.data
-        filename = random_filename(f.filename)
+        # filename = random_filename(f.filename)
+        ext = os.path.splitext(f.filename)[1]
+        filename = os.path.join(group_id, date, name, f'{date}-{name}-{1}'+ext)
         f.save(os.path.join(app.config['UPLOAD_PATH'], filename))
 
         f = form.screenshot_2.data
-        filename = random_filename(f.filename)
+        # filename = random_filename(f.filename)
+        ext = os.path.splitext(f.filename)[1]
+        filename = os.path.join(group_id, date, name, f'{date}-{name}-{2}' + ext)
         f.save(os.path.join(app.config['UPLOAD_PATH'], filename))
 
         f = form.screenshot_3.data
-        filename = random_filename(f.filename)
+        # filename = random_filename(f.filename)
+        ext = os.path.splitext(f.filename)[1]
+        filename = os.path.join(group_id, date, name, f'{date}-{name}-{3}' + ext)
         f.save(os.path.join(app.config['UPLOAD_PATH'], filename))
 
         flash('Upload success.')
@@ -86,14 +98,16 @@ def success():
 
 
 def make_today_dirs(today: str, group_id: int):
-    for name in config.name_list[group_id]:
-        os.makedirs(os.path.join('database', str(group_id), today, name), exist_ok=True)
+    print(config.name_list[group_id-1])
+    for name in config.name_list[group_id-1]:
+        print(f'make dirs: {group_id, today, name}')
+        os.makedirs(os.path.join(app.config['UPLOAD_PATH'], str(group_id), today, name), exist_ok=True)
     pass
 
 
 def init_env():
     for i in config.group_list:
-        os.makedirs(os.path.join('database', i), exist_ok=True)
+        os.makedirs(os.path.join(app.config['UPLOAD_PATH'], i), exist_ok=True)
     pass
 
 

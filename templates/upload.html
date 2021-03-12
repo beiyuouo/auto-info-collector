@@ -4,14 +4,14 @@
 {% block content %}
 <h2>File Upload Form</h2>
 
-<form method="post" enctype="multipart/form-data">
-    {{ form.csrf_token }}
-    {{ form.group }}
-    {{ form.date }}
-    {{ form.name }}
-    {{ form_field(form.screenshot_1) }}
-    {{ form_field(form.screenshot_2) }}
-    {{ form_field(form.screenshot_3) }}
+<form method="post" enctype="multipart/form-data" style="width: 50%; margin: 0 auto">
+    {{ form.csrf_token }} <br />
+    {{ form.group }} <br />
+    {{ form.date }} <br />
+    {{ form.name }} <br />
+    {{ form_field(form.screenshot_1) }} <br />
+    {{ form_field(form.screenshot_2) }} <br />
+    {{ form_field(form.screenshot_3) }} <br />
     {{ form.submit }}
 </form>
 {% endblock %}

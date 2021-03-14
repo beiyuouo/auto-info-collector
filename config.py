@@ -29,6 +29,7 @@ class Config(object):
         self.group_list = self.info['组别'].unique()
         self.name_list = []
         self.info_list = []
+        self.name_list_all = []
         for i in self.group_list:
             # print(i)
             new_df = self.info[self.info['组别'] == i]
@@ -40,6 +41,7 @@ class Config(object):
                 stu_info = {'学号': x['学号'], '姓名': x['姓名'], '组别': x['组别'], '是否是组长': x['备注']}
                 _group_info_cached.append(stu_info)
                 _name_cached.append(x['姓名'])
+                self.name_list_all.append(x['姓名'])
                 # print(stu_info)
             self.info.append(_group_info_cached)
             self.name_list.append(_name_cached)

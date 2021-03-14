@@ -4,10 +4,21 @@
 
 自动化打卡截图上传收集
 
+# How to use
+
+```sh
+pip install -r requirement.txt
+python main.py
+```
+
 # Changelog
 
 <details>
     <summary>点击查看更多</summary>
+
+## v_1.1.1_alpha
+
+- 修复了一个bug，该bug曾让非第一组成员无法正常提交
 
 ## v_1.1.0_alpha
 
@@ -21,6 +32,11 @@
 
 
 </details>
+
+# TODO
+- 可视化数据统计
+- 提供后台接口
+- 界面美化
 
 # Welcome
 

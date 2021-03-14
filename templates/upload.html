@@ -15,8 +15,7 @@
     {{ form.submit }}
 </form>
 <script>
-    $("#group").change(function () {
-        var group_id = $("#group").val();
+    function ff(group_id) {
         $.ajax(
             {
                 url: "/name",
@@ -43,6 +42,15 @@
                     alert(err);
                 }
             });
+    }
+
+    var group_id = $("#group").val();
+    group_id = String(Number.parseInt(group_id)-1)
+    ff(group_id)
+    $("#group").change(function () {
+        var group_id = $("#group").val();
+        group_id = String(Number.parseInt(group_id)-1)
+        ff(group_id)
     })
 </script>
 {% endblock %}

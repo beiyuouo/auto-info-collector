@@ -24,4 +24,5 @@ __pycache__/
 .ipynb_checkpoints
 
 # path
-
+*.xlsx
+*.csv

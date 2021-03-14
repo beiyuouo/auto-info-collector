@@ -7,7 +7,7 @@ __author__ = "BeiYu"
 import os
 import uuid
 
-from flask import Flask, render_template, flash, redirect, url_for, request, send_from_directory, session
+from flask import Flask, render_template, flash, redirect, url_for, request, send_from_directory, session, jsonify
 from flask_wtf.csrf import validate_csrf
 from wtforms import ValidationError
 
@@ -65,7 +65,7 @@ def upload():
         group_id = str(form.group.data)
         name = str(form.name.data)
         date = str(form.date.data)
-        print(group_id, name, date)
+        # print(group_id, name, date)
         make_today_dirs(date, int(group_id))
 
         f = form.screenshot_1.data
@@ -97,6 +97,15 @@ def success():
     return "<h2>Success</h2>"
 
 
+@app.route('/name', methods=['GET', 'POST'])
+def query_name():
+    group_id = request.args.get("group")
+    print(group_id)
+    if not group_id:
+        group_id = 0
+    return jsonify({'data': config.name_list[int(group_id)]})
+
+
 def make_today_dirs(today: str, group_id: int):
     print(config.name_list[group_id-1])
     for name in config.name_list[group_id-1]:
@@ -107,7 +116,7 @@ def make_today_dirs(today: str, group_id: int):
 
 def init_env():
     for i in config.group_list:
-        os.makedirs(os.path.join(app.config['UPLOAD_PATH'], i), exist_ok=True)
+        os.makedirs(os.path.join(app.config['UPLOAD_PATH'], str(i)), exist_ok=True)
     pass
 
 

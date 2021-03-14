@@ -5,19 +5,55 @@
 
 __author__ = "BeiYu"
 
+import os
+import pandas as pd
+
+
+def reader(file_path=os.path.join("database", "group_list.xlsx")):
+    df = pd.read_excel(file_path)
+    # print(df.head())
+    # print(df['组别'].unique())
+    return df
+
 
 class Config(object):
     def __init__(self):
         self.debug = True
         self.host = '0.0.0.0'
         self.port = '5000'
-        self.mysql_host = 'localhost'
-        self.mysql_username = 'root'
-        self.mysql_password = 'root'
-        self.group_num = 12
-        self.group_list = [str(i) for i in range(1, self.group_num+1)]
-        self.name_list = [[] for i in range(1, self.group_num+1)]
-        self.name_list[0] = ['闫冰洁', '吴水海', '平静怡', '蒋英奇', '刘莉萍', '闫梦帆', '张琬涓', '谢品浩', '滕畅', '王楠']
+        # self.mysql_host = 'localhost'
+        # self.mysql_username = 'root'
+        # self.mysql_password = 'root'
+        self.info = reader(file_path=os.path.join('database', 'group_list.xlsx'))
+        self.group_num = len(self.info['组别'].unique())
+        self.group_list = self.info['组别'].unique()
+        self.name_list = []
+        self.info_list = []
+        for i in self.group_list:
+            # print(i)
+            new_df = self.info[self.info['组别'] == i]
+            _group_info_cached = []
+            _name_cached = []
+            # print(new_df)
+            for idx, x in new_df.iterrows():
+                # print(x)
+                stu_info = {'学号': x['学号'], '姓名': x['姓名'], '组别': x['组别'], '是否是组长': x['备注']}
+                _group_info_cached.append(stu_info)
+                _name_cached.append(x['姓名'])
+                # print(stu_info)
+            self.info.append(_group_info_cached)
+            self.name_list.append(_name_cached)
+
+        # print(self.name_list[1])
 
 
 config = Config()
+
+
+def dprint(param):
+    if config.debug:
+        print(param)
+
+
+if __name__ == '__main__':
+    reader()

@@ -17,11 +17,13 @@ from config import config
 
 
 class UploadForm(FlaskForm):
-    group = SelectField(u'组别', choices=config.group_list)
+    group = SelectField(u'组别', choices=config.group_list, id="group")
     date = DateField(u'日期', format="%Y-%m-%d", default=datetime.today(),
                      validators=[DataRequired(message=u'日期不能为空')])
-    name = SelectField(u'姓名', choices=config.name_list[0])
+    name = SelectField(u'姓名', choices=config.name_list[0], id="name")
     screenshot_1 = FileField('Upload Image 1', validators=[FileRequired(), FileAllowed(['jpg', 'jpeg', 'png', 'gif'])])
     screenshot_2 = FileField('Upload Image 2', validators=[FileRequired(), FileAllowed(['jpg', 'jpeg', 'png', 'gif'])])
     screenshot_3 = FileField('Upload Image 3', validators=[FileRequired(), FileAllowed(['jpg', 'jpeg', 'png', 'gif'])])
     submit = SubmitField()
+    name_list = config.name_list
+

@@ -6,12 +6,43 @@
 
 <form method="post" enctype="multipart/form-data" style="width: 50%; margin: 0 auto">
     {{ form.csrf_token }} <br />
-    {{ form.group }} <br />
-    {{ form.date }} <br />
-    {{ form.name }} <br />
-    {{ form_field(form.screenshot_1) }} <br />
-    {{ form_field(form.screenshot_2) }} <br />
-    {{ form_field(form.screenshot_3) }} <br />
+    组别：{{ form.group }}<br />
+    日期：{{ form.date }}<br />
+    姓名：{{ form.name }}<br />
+    {{ form_field(form.screenshot_1) }}<br />
+    {{ form_field(form.screenshot_2) }}<br />
+    {{ form_field(form.screenshot_3) }}<br />
     {{ form.submit }}
 </form>
+<script>
+    $("#group").change(function () {
+        var group_id = $("#group").val();
+        $.ajax(
+            {
+                url: "/name",
+                type: "get",
+                contentType: "application/json",
+                dataType:"json",
+                data: "group=" + group_id,
+                success: function (result) {
+                    // alert(result['data']);
+                    var optionTags = '';
+                    console.log(result['data']);
+                    for(var x in result['data']) {
+                        // console.log(x)
+                        // console.log(result['data'][x])
+                        optionTags += '<option value="'+result['data'][x]+'">' + result['data'][x]+'</option>';
+                    }
+                    $('#name').empty();
+                    $('#name').append(optionTags);
+                },
+                error: function (xhr, status, p3, p4) {
+                    var err = "Error " + " " + status + " " + p3;
+                    if (xhr.responseText && xhr.responseText[0] == "{")
+                        err = JSON.parse(xhr.responseText).message;
+                    alert(err);
+                }
+            });
+    })
+</script>
 {% endblock %}

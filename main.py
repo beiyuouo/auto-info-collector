@@ -88,7 +88,7 @@ def upload():
 
         flash('Upload success.')
         session['filenames'] = [filename]
-        return redirect(url_for('success'))
+        return render_template('upload.html', form=form)
     return render_template('upload.html', form=form)
 
 
@@ -117,6 +117,7 @@ def make_today_dirs(today: str, group_id: int):
 def init_env():
     for i in config.group_list:
         os.makedirs(os.path.join(app.config['UPLOAD_PATH'], str(i)), exist_ok=True)
+        # print(f'mkdir: {i}')
     pass
 
 

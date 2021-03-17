@@ -16,6 +16,9 @@ python main.py
 <details>
     <summary>点击查看更多</summary>
 
+## v_1.1.2
+- 修复了一个bug，该bug曾让日期框始终为运行日期
+
 ## v_1.1.1_alpha
 
 - 修复了一个bug，该bug曾让非第一组成员无法正常提交

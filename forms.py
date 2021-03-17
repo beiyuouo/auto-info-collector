@@ -5,7 +5,7 @@
 
 __author__ = "BeiYu"
 
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileRequired, FileAllowed
@@ -18,7 +18,7 @@ from config import config
 
 class UploadForm(FlaskForm):
     group = SelectField(u'组别', choices=config.group_list, id="group")
-    date = DateField(u'日期', format="%Y-%m-%d", default=datetime.today(),
+    date = DateField(u'日期', format="%Y-%m-%d", default=datetime.today(), id="date",
                      validators=[DataRequired(message=u'日期不能为空')])
     name = SelectField(u'姓名', choices=config.name_list_all, id="name")
     screenshot_1 = FileField('Upload Image 1', validators=[FileRequired(), FileAllowed(['jpg', 'jpeg', 'png', 'gif'])])

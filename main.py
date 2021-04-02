@@ -4,8 +4,10 @@
 # Description:
 
 __author__ = "BeiYu"
+
 import os
 import uuid
+import shutil
 
 from flask import Flask, render_template, flash, redirect, url_for, request, send_from_directory, session, jsonify
 from flask_wtf.csrf import validate_csrf
@@ -22,9 +24,13 @@ app.jinja_env.lstrip_blocks = True
 
 # Custom config
 app.config['UPLOAD_PATH'] = os.path.join(app.root_path, 'uploads')
+app.config['DOWNLOAD_PATH'] = os.path.join(app.root_path, 'downloads')
 
 if not os.path.exists(app.config['UPLOAD_PATH']):
     os.makedirs(app.config['UPLOAD_PATH'])
+
+if not os.path.exists(app.config['DOWNLOAD_PATH']):
+    os.makedirs(app.config['DOWNLOAD_PATH'])
 
 app.config['ALLOWED_EXTENSIONS'] = ['png', 'jpg', 'jpeg', 'gif']
 
@@ -71,7 +77,7 @@ def upload():
         f = form.screenshot_1.data
         # filename = random_filename(f.filename)
         ext = os.path.splitext(f.filename)[1]
-        filename = os.path.join(group_id, date, name, f'{date}-{name}-{1}'+ext)
+        filename = os.path.join(group_id, date, name, f'{date}-{name}-{1}' + ext)
         f.save(os.path.join(app.config['UPLOAD_PATH'], filename))
 
         f = form.screenshot_2.data
@@ -106,9 +112,37 @@ def query_name():
     return jsonify({'data': config.name_list[int(group_id)]})
 
 
+@app.route('/download', methods=['GET', 'POST'])
+def download():
+    pack_files()
+    group_id = request.args.get("group")
+    print(group_id)
+    if not group_id:
+        return send_from_directory(app.config['DOWNLOAD_PATH'], f'uploads.zip')
+
+    return send_from_directory(app.config['DOWNLOAD_PATH'], f'{str(group_id)}.zip')
+
+
+# @app.route('/query', methods=['GET', 'POST'])
+# def query():
+#     group_id = request.args.get("group")
+#     print(group_id)
+#     if not group_id:
+#         group_id = 0
+#     return jsonify({'data': config.name_list[int(group_id)]})
+
+
+def pack_files():
+    shutil.make_archive(os.path.join(app.config['DOWNLOAD_PATH'], "uploads"), "zip",
+                        os.path.join(app.config['UPLOAD_PATH']))
+    for i in range(1, config.group_num + 1):
+        shutil.make_archive(os.path.join(app.config['DOWNLOAD_PATH'], str(i)), "zip",
+                            os.path.join(app.config['UPLOAD_PATH']), f'{str(i)}')
+
+
 def make_today_dirs(today: str, group_id: int):
-    print(config.name_list[group_id-1])
-    for name in config.name_list[group_id-1]:
+    print(config.name_list[group_id - 1])
+    for name in config.name_list[group_id - 1]:
         print(f'make dirs: {group_id, today, name}')
         os.makedirs(os.path.join(app.config['UPLOAD_PATH'], str(group_id), today, name), exist_ok=True)
     pass

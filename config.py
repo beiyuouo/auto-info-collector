@@ -46,6 +46,7 @@ class Config(object):
             self.info.append(_group_info_cached)
             self.name_list.append(_name_cached)
 
+        self.submit_table = None
         # print(self.name_list[1])
 
 

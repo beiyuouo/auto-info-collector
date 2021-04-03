@@ -16,6 +16,7 @@ from wtforms import ValidationError
 from forms import UploadForm
 
 from config import config
+import pandas as pd
 
 app = Flask(__name__)
 app.secret_key = os.getenv('SECRET_KEY', 'secret string')
@@ -25,6 +26,7 @@ app.jinja_env.lstrip_blocks = True
 # Custom config
 app.config['UPLOAD_PATH'] = os.path.join(app.root_path, 'uploads')
 app.config['DOWNLOAD_PATH'] = os.path.join(app.root_path, 'downloads')
+app.config['JSON_AS_ASCII'] = False
 
 if not os.path.exists(app.config['UPLOAD_PATH']):
     os.makedirs(app.config['UPLOAD_PATH'])
@@ -123,13 +125,53 @@ def download():
     return send_from_directory(app.config['DOWNLOAD_PATH'], f'{str(group_id)}.zip')
 
 
-# @app.route('/query', methods=['GET', 'POST'])
-# def query():
-#     group_id = request.args.get("group")
-#     print(group_id)
-#     if not group_id:
-#         group_id = 0
-#     return jsonify({'data': config.name_list[int(group_id)]})
+@app.route('/query_table', methods=['GET', 'POST'])
+def query_table():
+    group_id = request.args.get("group")
+    print(group_id)
+    if not group_id:
+        group_id = 0
+    df = get_table(group_id)
+    return jsonify(
+        {'group_id': group_id, 'head': df.index.tolist(), 'column': df.columns.tolist(), 'data': df.to_html()})
+
+
+@app.route('/show_table', methods=['GET', 'POST'])
+def show_table():
+    group_id = request.args.get("group")
+    return render_template('show_table.html',
+                           group_id=group_id)
+
+
+def get_table(group_id: int):
+    if group_id == 0:
+        return pd.DataFrame([])
+
+    date_list = os.listdir(os.path.join(app.config['UPLOAD_PATH'], str(group_id)))
+    if len(date_list) <= 0:
+        return pd.DataFrame([])
+    total_list = []
+
+    # total_list.append(config.name_list[int(group_id) - 1])
+
+    for date in date_list:
+        _daily_list = []
+        for name in config.name_list[int(group_id) - 1]:
+            if len(os.listdir(os.path.join(app.config['UPLOAD_PATH'], str(group_id), date, name))) > 2:
+                _daily_list.append("√")
+            else:
+                _daily_list.append("×")
+        total_list.append(_daily_list)
+
+    date_list = date_list
+
+    df = pd.DataFrame(total_list)
+    df.index = date_list
+    df.columns = config.name_list[int(group_id) - 1]
+    df.sort_index(inplace=True)
+    # print(df.head)
+
+    return df
 
 
 def pack_files():

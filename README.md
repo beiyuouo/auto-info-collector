@@ -16,8 +16,15 @@ python main.py
 <details>
     <summary>点击查看更多</summary>
 
+## v_1.3.1_alpha
+- 新增两个接口，可以查看打卡统计情况
+
+> Usage: `query_table[?group=x]`获取table数据json形式
+> Usage: `show_table[?group=x]`展示数据统计情况
+
+
 ## v_1.2.1_alpha
-- 添加的下载文件功能，使用方法为`GET`或`POST`访问`host\download[?group=x]`，`[]`内为可选参数若为空，则下载全部打包文件
+- 添加的下载文件功能，使用方法为`GET`或`POST`访问`{host}/download[?group=x]`，`[]`内为可选参数若为空，则下载全部打包文件
 
 ## v_1.1.2_alpha
 - 修复了一个bug，该bug曾让日期框始终为运行日期
@@ -47,6 +54,7 @@ python main.py
 - [ ] 网站日志分析
 - [ ] 优化性能，减少重复打包、创建操作
 - [ ] 界面美化
+- [ ] 操作异步处理
 
 # Welcome
 

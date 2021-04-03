@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% from 'macros.html' import form_field %}
+
+{% block content %}
+<div id="analysis">
+    <table id="analysis-table"></table>
+</div>
+
+<script>
+    function ff(group_id) {
+        $.ajax(
+            {
+                url: "/query_table",
+                type: "get",
+                contentType: "application/json",
+                dataType:"json",
+                data: "group=" + group_id,
+                success: function (result) {
+                    // alert(result['data']);
+                    console.log(result['data']);
+                    var tableHtml = result['data'];
+                    $("#analysis").html(tableHtml);
+                    var flag = 0;
+                    for(var x in result['data']) {
+                        // console.log(x);
+                        // console.log(result['data'][x]);
+                        if(flag == 0) {
+                            flag = 1;
+                        }
+                    }
+                },
+                error: function (xhr, status, p3, p4) {
+                    var err = "Error " + " " + status + " " + p3;
+                    if (xhr.responseText && xhr.responseText[0] == "{")
+                        err = JSON.parse(xhr.responseText).message;
+                    alert(err);
+                }
+            });
+    }
+
+    var group_id = {{ group_id }};
+    console.log(group_id);
+    group_id = String(Number.parseInt(group_id))
+    ff(group_id)
+
+
+
+</script>
+{% endblock %}
